@@ -30,6 +30,7 @@ public class TestFields {
     public static final String USER_ID = "012345";
     public static final String USER_ID_2 = "678910";
     public static final String USER_ID_3 = "024681";
+    public static final String USER_ID_4 = "401905";
     public static final String SESSION_ID = "abcde";
     public static final String SESSION_ID_2 = "fghij";
     public static final Integer ID = 1;
@@ -65,7 +66,11 @@ public class TestFields {
 
     public static final String PYTHON_CODE = "print('hello')";
     public static final CodeLanguage PYTHON_LANGUAGE = CodeLanguage.PYTHON;
-    public static final PlayerCode PLAYER_CODE = new PlayerCode(PYTHON_CODE, PYTHON_LANGUAGE);
+    public static final PlayerCode PLAYER_CODE_1 = new PlayerCode(PYTHON_CODE, PYTHON_LANGUAGE);
+
+    public static final String JAVA_CODE = "System.out.println(\"hello\");";
+    public static final CodeLanguage JAVA_LANGUAGE = CodeLanguage.JAVA;
+    public static final PlayerCode PLAYER_CODE_2 = new PlayerCode(JAVA_CODE, JAVA_LANGUAGE);
 
     public static final Integer NUM_PROBLEMS = 10;
 

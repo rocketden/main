@@ -1,4 +1,4 @@
-package com.codejoust.main.util;
+package com.codejoust.main.task;
 
 import java.time.Instant;
 import java.util.TimerTask;

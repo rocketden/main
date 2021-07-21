@@ -1,8 +1,10 @@
 package com.codejoust.main.service;
 
 import com.codejoust.main.dao.AccountRepository;
+import com.codejoust.main.dao.ProblemContainerRepository;
 import com.codejoust.main.dao.ProblemRepository;
 import com.codejoust.main.dao.ProblemTagRepository;
+import com.codejoust.main.dao.RoomRepository;
 import com.codejoust.main.dto.account.AccountRole;
 import com.codejoust.main.dto.problem.CreateProblemRequest;
 import com.codejoust.main.dto.problem.CreateProblemTagRequest;
@@ -16,7 +18,9 @@ import com.codejoust.main.exception.AccountError;
 import com.codejoust.main.exception.ProblemError;
 import com.codejoust.main.exception.api.ApiException;
 import com.codejoust.main.model.Account;
+import com.codejoust.main.model.Room;
 import com.codejoust.main.model.problem.Problem;
+import com.codejoust.main.model.problem.ProblemContainer;
 import com.codejoust.main.model.problem.ProblemDifficulty;
 import com.codejoust.main.model.problem.ProblemIOType;
 import com.codejoust.main.model.problem.ProblemInput;
@@ -47,7 +51,9 @@ public class ProblemService {
     private final FirebaseService service;
     private final ProblemRepository problemRepository;
     private final ProblemTagRepository problemTagRepository;
+    private final ProblemContainerRepository problemContainerRepository;
     private final AccountRepository accountRepository;
+    private final RoomRepository roomRepository;
     private final List<DefaultCodeGeneratorService> defaultCodeGeneratorServiceList;
     private final Random random = new Random();
     private final Gson gson = new Gson();
@@ -56,13 +62,17 @@ public class ProblemService {
     public ProblemService(FirebaseService service,
         ProblemRepository problemRepository,
         ProblemTagRepository problemTagRepository,
+        ProblemContainerRepository problemContainerRepository,
         AccountRepository accountRepository,
+        RoomRepository roomRepository,
         List<DefaultCodeGeneratorService> defaultCodeGeneratorServiceList) {
 
         this.service = service;
         this.problemRepository = problemRepository;
         this.problemTagRepository = problemTagRepository;
+        this.problemContainerRepository = problemContainerRepository;
         this.accountRepository = accountRepository;
+        this.roomRepository = roomRepository;
         this.defaultCodeGeneratorServiceList = defaultCodeGeneratorServiceList;
     }
 
@@ -243,6 +253,25 @@ public class ProblemService {
         }
 
         service.verifyTokenMatchesUid(token, problem.getOwner().getUid());
+
+        /**
+         * Before the problem can be deleted, set all foreign key references
+         * to the Problem within all ProblemContainers to null.
+         * See https://stackoverflow.com/a/10030873/7517518.
+         */
+        List<ProblemContainer> problemContainers = problemContainerRepository.findAllByProblem(problem);
+        for (ProblemContainer problemContainer : problemContainers) {
+            problemContainer.setProblem(null);
+            problemContainerRepository.save(problemContainer);
+        }
+
+        // Remove this problem from all the associated rooms.
+        List<Room> rooms = roomRepository.findByProblems_ProblemId(problemId);
+        for (Room room : rooms) {
+            room.removeProblem(problem);
+            roomRepository.save(room);
+        }
+
         problemRepository.delete(problem);
 
         return ProblemMapper.toDto(problem);

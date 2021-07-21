@@ -3,6 +3,7 @@ package com.codejoust.main.model;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -58,9 +59,13 @@ public class User {
     private Room room;
 
     // Thie list holds the submission group associated with the current room
-    @OneToMany(fetch = FetchType.EAGER)
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @Setter(AccessLevel.PRIVATE)
     @Fetch(value = FetchMode.SUBSELECT)
     @JoinColumn(name = "submission_group_reports_table_id")
     private List<SubmissionGroupReport> submissionGroupReports = new ArrayList<>();
+
+    public void addSubmissionGroupReport(SubmissionGroupReport submissionGroupReport) {
+        submissionGroupReports.add(submissionGroupReport);
+    }
 }

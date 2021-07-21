@@ -6,7 +6,7 @@ import java.util.Map.Entry;
 import com.codejoust.main.dto.game.GameNotificationDto;
 import com.codejoust.main.game_object.Game;
 import com.codejoust.main.game_object.GameTimer;
-import com.codejoust.main.util.NotificationTimerTask;
+import com.codejoust.main.task.NotificationTimerTask;
 
 import org.springframework.stereotype.Service;
 

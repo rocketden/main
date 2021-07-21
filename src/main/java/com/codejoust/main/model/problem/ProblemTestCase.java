@@ -4,6 +4,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -24,9 +25,11 @@ public class ProblemTestCase {
     private Integer id;
 
     @EqualsAndHashCode.Include
+    @Column(columnDefinition = "TEXT")
     private String input;
 
     @EqualsAndHashCode.Include
+    @Column(columnDefinition = "TEXT")
     private String output;
 
     @EqualsAndHashCode.Include
@@ -37,5 +40,6 @@ public class ProblemTestCase {
     private Problem problem;
 
     @EqualsAndHashCode.Include
+    @Column(columnDefinition = "TEXT")
     private String explanation;
 }

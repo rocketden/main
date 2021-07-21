@@ -27,7 +27,10 @@ import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collections;
 
+import com.codejoust.main.dao.AccountRepository;
+import com.codejoust.main.dao.GameReportRepository;
 import com.codejoust.main.dao.RoomRepository;
+import com.codejoust.main.dao.UserRepository;
 import com.codejoust.main.dto.game.GameDto;
 import com.codejoust.main.dto.game.GameMapper;
 import com.codejoust.main.dto.game.GameNotificationDto;
@@ -47,17 +50,27 @@ import com.codejoust.main.game_object.Game;
 import com.codejoust.main.game_object.GameTimer;
 import com.codejoust.main.game_object.NotificationType;
 import com.codejoust.main.game_object.Player;
-import com.codejoust.main.game_object.Submission;
 import com.codejoust.main.model.Room;
 import com.codejoust.main.model.User;
 import com.codejoust.main.model.problem.Problem;
 import com.codejoust.main.model.problem.ProblemDifficulty;
+import com.codejoust.main.model.report.GameReport;
+import com.codejoust.main.util.UtilityTestMethods;
 
 @ExtendWith(MockitoExtension.class)
 public class GameManagementServiceTests {
 
     @Mock
     private RoomRepository repository;
+
+    @Mock
+    private GameReportRepository gameReportRepository;
+    
+    @Mock
+    private AccountRepository accountRepository;
+
+    @Mock
+    private UserRepository userRepository;
 
     @Mock
     private SocketService socketService;
@@ -77,19 +90,6 @@ public class GameManagementServiceTests {
     @Spy
     @InjectMocks
     private GameManagementService gameService;
-
-    // Helper method to add a dummy submission to a Player object
-    private void addSubmissionHelper(Player player, int numCorrect) {
-        Submission submission = new Submission();
-        submission.setNumCorrect(numCorrect);
-        submission.setNumTestCases(TestFields.NUM_PROBLEMS);
-        submission.setStartTime(Instant.now());
-
-        player.getSubmissions().add(submission);
-        if (numCorrect == TestFields.NUM_PROBLEMS) {
-            player.setSolved(new boolean[]{true});
-        }
-    }
 
     @Test
     public void addGetAndRemoveGame() {
@@ -360,7 +360,7 @@ public class GameManagementServiceTests {
         submissionDto.setNumTestCases(TestFields.NUM_PROBLEMS);
         Mockito.doAnswer(new Answer<SubmissionDto>() {
             public SubmissionDto answer(InvocationOnMock invocation) {
-                addSubmissionHelper(game.getPlayers().get(TestFields.USER_ID), 10);
+                UtilityTestMethods.addSubmissionHelper(game.getPlayers().get(TestFields.USER_ID), 0, TestFields.PLAYER_CODE_1, 1);
                 game.setAllSolved(true);
                 return submissionDto;
             }})
@@ -401,8 +401,8 @@ public class GameManagementServiceTests {
         Game game = gameService.getGameFromRoomId(TestFields.ROOM_ID);
 
         // Add submissions for the first two users.
-        addSubmissionHelper(game.getPlayers().get(TestFields.USER_ID), 10);
-        addSubmissionHelper(game.getPlayers().get(TestFields.USER_ID_2), 10);
+        UtilityTestMethods.addSubmissionHelper(game.getPlayers().get(TestFields.USER_ID), 0, TestFields.PLAYER_CODE_1, 1);
+        UtilityTestMethods.addSubmissionHelper(game.getPlayers().get(TestFields.USER_ID_2), 0, TestFields.PLAYER_CODE_1, 1);
 
         SubmissionRequest request = new SubmissionRequest();
         request.setLanguage(TestFields.PYTHON_LANGUAGE);
@@ -415,7 +415,7 @@ public class GameManagementServiceTests {
         submissionDto.setNumTestCases(TestFields.NUM_PROBLEMS);
         Mockito.doAnswer(new Answer<SubmissionDto>() {
             public SubmissionDto answer(InvocationOnMock invocation) {
-                addSubmissionHelper(game.getPlayers().get(TestFields.USER_ID_3), 10);
+                UtilityTestMethods.addSubmissionHelper(game.getPlayers().get(TestFields.USER_ID_3), 0,TestFields.PLAYER_CODE_1, 1);
                 game.setAllSolved(true);
                 return submissionDto;
             }})
@@ -461,7 +461,7 @@ public class GameManagementServiceTests {
         submissionDto.setNumTestCases(TestFields.NUM_PROBLEMS);
         Mockito.doAnswer(new Answer<SubmissionDto>() {
             public SubmissionDto answer(InvocationOnMock invocation) {
-                addSubmissionHelper(game.getPlayers().get(TestFields.USER_ID), 10);
+                UtilityTestMethods.addSubmissionHelper(game.getPlayers().get(TestFields.USER_ID), 0, TestFields.PLAYER_CODE_1, 1);
                 return submissionDto;
             }})
           .when(submitService).submitSolution(game, request);
@@ -907,12 +907,12 @@ public class GameManagementServiceTests {
         Mockito.doReturn(Collections.singletonList(new Problem())).when(problemService).getProblemsFromDifficulty(Mockito.any(), Mockito.any());
         gameService.createAddGameFromRoom(room);
         Game game = gameService.getGameFromRoomId(TestFields.ROOM_ID);
-        gameService.updateCode(TestFields.ROOM_ID, TestFields.USER_ID, TestFields.PLAYER_CODE);
+        gameService.updateCode(TestFields.ROOM_ID, TestFields.USER_ID, TestFields.PLAYER_CODE_1);
 
         Player player = game.getPlayers().get(TestFields.USER_ID);
 
         // Confirm that the live game service method is called correctly.
-        verify(liveGameService).updateCode(eq(player), eq(TestFields.PLAYER_CODE));
+        verify(liveGameService).updateCode(eq(player), eq(TestFields.PLAYER_CODE_1));
     }
 
     @Test
@@ -927,7 +927,7 @@ public class GameManagementServiceTests {
 
         Mockito.doReturn(Collections.singletonList(new Problem())).when(problemService).getProblemsFromDifficulty(Mockito.any(), Mockito.any());
         gameService.createAddGameFromRoom(room);
-        ApiException exception = assertThrows(ApiException.class, () -> gameService.updateCode("999999", TestFields.USER_ID, TestFields.PLAYER_CODE));
+        ApiException exception = assertThrows(ApiException.class, () -> gameService.updateCode("999999", TestFields.USER_ID, TestFields.PLAYER_CODE_1));
         assertEquals(GameError.NOT_FOUND, exception.getError());
     }
 
@@ -943,7 +943,7 @@ public class GameManagementServiceTests {
 
         Mockito.doReturn(Collections.singletonList(new Problem())).when(problemService).getProblemsFromDifficulty(Mockito.any(), Mockito.any());
         gameService.createAddGameFromRoom(room);
-        ApiException exception = assertThrows(ApiException.class, () -> gameService.updateCode(TestFields.ROOM_ID, "999999", TestFields.PLAYER_CODE));
+        ApiException exception = assertThrows(ApiException.class, () -> gameService.updateCode(TestFields.ROOM_ID, "999999", TestFields.PLAYER_CODE_1));
         assertEquals(GameError.USER_NOT_IN_GAME, exception.getError());
     }
 
@@ -986,7 +986,7 @@ public class GameManagementServiceTests {
     }
 
     @Test
-    public void endGameCancelsTimers() {
+    public void endGameCancelsTimersCreateReport() {
         Room room = new Room();
         room.setRoomId(TestFields.ROOM_ID);
         room.setDuration(12L);
@@ -1007,6 +1007,9 @@ public class GameManagementServiceTests {
         // Neither the end game nor time left notifications are sent
         verify(socketService, after(13000).never()).sendSocketUpdate(Mockito.any(String.class), Mockito.any(GameNotificationDto.class));
         verify(socketService, never()).sendSocketUpdate(Mockito.any(GameDto.class));
+
+        // Game report is saved after one minute past handleEndGame
+        verify(gameReportRepository, after(61300)).save(Mockito.any(GameReport.class));
     }
 
     @Test

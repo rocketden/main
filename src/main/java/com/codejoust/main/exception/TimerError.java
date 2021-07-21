@@ -11,7 +11,7 @@ import org.springframework.http.HttpStatus;
 public enum TimerError implements ApiError {
 
     INVALID_DURATION(HttpStatus.BAD_REQUEST, "Please enter a valid duration between 1-60 minutes."),
-    NULL_SETTING(HttpStatus.BAD_REQUEST, "The game, associated game timer, room, room ID, and socket service must not be null.");
+    NULL_SETTING(HttpStatus.BAD_REQUEST, "The relevant game settings must not be null.");
 
     private final HttpStatus status;
     private final ApiErrorResponse response;

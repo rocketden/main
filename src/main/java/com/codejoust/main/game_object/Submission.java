@@ -13,6 +13,7 @@ import java.util.List;
 public class Submission {
 
     private PlayerCode playerCode;
+
     private int problemIndex;
 
     private List<SubmissionResult> results;

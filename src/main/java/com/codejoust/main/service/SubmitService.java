@@ -91,8 +91,6 @@ public class SubmitService {
 
     // Test the submission and send a socket update.
     public SubmissionDto runCode(Game game, SubmissionRequest request) {
-        String userId = request.getInitiator().getUserId();
-
         PlayerCode playerCode = new PlayerCode();
         playerCode.setCode(request.getCode());
         playerCode.setLanguage(request.getLanguage());

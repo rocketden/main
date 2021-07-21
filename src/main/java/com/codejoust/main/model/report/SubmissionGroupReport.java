@@ -3,6 +3,7 @@ package com.codejoust.main.model.report;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -31,9 +32,22 @@ public class SubmissionGroupReport {
 
     private String gameReportId;
 
-    @OneToMany(fetch = FetchType.EAGER)
+    /**
+     * String to represent problems solved.
+     * Each index represents the problem index.
+     * 0 = Not Solved, 1 = Solved.
+     */
+    private String problemsSolved;
+    
+    private Integer numTestCasesPassed;
+
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @Setter(AccessLevel.PRIVATE)
     @Fetch(value = FetchMode.SUBSELECT)
     @JoinColumn(name = "submission_reports_table_id")
     private List<SubmissionReport> submissionReports = new ArrayList<>();
+
+    public void addSubmissionReport(SubmissionReport submissionReport) {
+        submissionReports.add(submissionReport);
+    }
 }

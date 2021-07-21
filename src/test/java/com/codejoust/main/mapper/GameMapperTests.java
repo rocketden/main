@@ -19,7 +19,6 @@ import com.codejoust.main.dto.game.PlayerDto;
 import com.codejoust.main.dto.game.SubmissionDto;
 import com.codejoust.main.dto.game.SubmissionResultDto;
 import com.codejoust.main.dto.problem.ProblemDto;
-import com.codejoust.main.dto.problem.ProblemMapper;
 import com.codejoust.main.dto.problem.ProblemTestCaseDto;
 import com.codejoust.main.dto.room.RoomMapper;
 import com.codejoust.main.dto.user.UserMapper;

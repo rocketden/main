@@ -1,7 +1,11 @@
 package com.codejoust.main.dto.game;
 
 import com.codejoust.main.dto.problem.ProblemTestCaseDto;
+import com.codejoust.main.game_object.PlayerCode;
+import com.codejoust.main.game_object.Submission;
 import com.codejoust.main.game_object.SubmissionResult;
+import com.codejoust.main.model.report.CodeLanguage;
+import com.codejoust.main.model.report.SubmissionReport;
 
 import org.modelmapper.ModelMapper;
 
@@ -28,5 +32,19 @@ public class SubmissionMapper {
         submissionResult.setHidden(testCaseDto.isHidden());
         submissionResult.setInput(testCaseDto.getInput());
         return submissionResult;
+    }
+
+    public static SubmissionReport toSubmissionReport(Submission submission) {
+        if (submission == null) {
+            return null;
+        }
+
+        SubmissionReport submissionReport = mapper.map(submission, SubmissionReport.class);
+
+        // Get and set the player code for this submission.
+        PlayerCode playerCode = submission.getPlayerCode();
+        submissionReport.setCode(playerCode.getCode());
+        submissionReport.setLanguage(CodeLanguage.fromString(submission.getPlayerCode().getLanguage().name()));
+        return submissionReport;
     }
 }

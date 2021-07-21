@@ -33,8 +33,8 @@ public class LiveGameServiceTests {
 
         Game game = GameMapper.fromRoom(room);
         Player player = game.getPlayers().get(TestFields.USER_ID);
-        liveGameService.updateCode(player, TestFields.PLAYER_CODE);
+        liveGameService.updateCode(player, TestFields.PLAYER_CODE_1);
 
-        assertEquals(TestFields.PLAYER_CODE, player.getPlayerCode());
+        assertEquals(TestFields.PLAYER_CODE_1, player.getPlayerCode());
     }
 }
